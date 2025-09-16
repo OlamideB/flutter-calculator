@@ -42,6 +42,25 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         _result = '';
       } else if (value == '=') {
         _evaluate();
+      } else if (value == 'x²') {
+        // Square the current expression or last number
+        if (_expression.isNotEmpty && !_expression.endsWith('=')) {
+          try {
+            String exp = _expression.replaceAll('×', '*').replaceAll('÷', '/').replaceAll('%', '%');
+            final expression = Expression.parse(exp);
+            final evaluator = const ExpressionEvaluator();
+            final context = <String, dynamic>{};
+            final evalResult = evaluator.eval(expression, context);
+            double squared = double.parse(evalResult.toString());
+            squared = squared * squared;
+            _result = squared.toString();
+            _expression += '² = $_result';
+          } catch (e) {
+            _result = 'Error';
+            _hasError = true;
+            _expression += '² = Error';
+          }
+        }
       } else {
         if (_result.isNotEmpty && _expression.endsWith('=')) {
           // Start new expression after result
@@ -55,8 +74,11 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
   void _evaluate() {
     try {
-      // Replace '×' and '÷' with '*' and '/' for evaluation
-      String exp = _expression.replaceAll('×', '*').replaceAll('÷', '/');
+      // Replace '×', '÷', and '%' for evaluation
+      String exp = _expression
+          .replaceAll('×', '*')
+          .replaceAll('÷', '/')
+          .replaceAll('%', '%');
       final expression = Expression.parse(exp);
       final evaluator = const ExpressionEvaluator();
       final context = <String, dynamic>{};
@@ -160,9 +182,15 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   Row(
                     children: [
                       _buildButton('0'),
+                      _buildButton('%', color: Colors.orange[200], textColor: Colors.orange[900]), // Modulo
+                      _buildButton('x²', color: Colors.purple[100], textColor: Colors.purple[900]), // Square
+                      _buildButton('+', color: Colors.blueGrey[200]),
+                    ],
+                  ),
+                  Row(
+                    children: [
                       _buildButton('C', color: Colors.red[200], textColor: Colors.red[900]),
                       _buildButton('=', color: Colors.green[200], textColor: Colors.green[900]),
-                      _buildButton('+', color: Colors.blueGrey[200]),
                     ],
                   ),
                 ],
